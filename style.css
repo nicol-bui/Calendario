@@ -1,0 +1,154 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+#calendarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+#monthYear {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+#weekDays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 20px;
+}
+.day {
+    border: 1px solid #adadad;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    min-height: 50px;
+}
+.day:hover {
+    background-color: #c2dcff;
+}
+.selected {
+    background-color: #e0e0e0;
+}
+.has-task {
+    background-color: #4CAF50;
+    font-weight: bold;
+}
+#taskList, #rewardsSection, #sponsorsSection, #socialWorkSection, #benefitsSection {
+    margin-bottom: 20px;
+}
+#taskInput {
+    width: calc(100% - 110px);
+    padding: 5px;
+    margin-right: 5px;
+}
+button {
+    padding: 5px 10px;
+    background-color: #0064d6;
+    border-radius: 5px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin: 5px;
+}
+button:hover {
+    background-color: #0055b69a;
+}
+#sponsorLogos {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.sponsor-logo {
+    width: 100px;
+    height: 100px;
+    background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin: 10px;
+}
+#weeklyProgress {
+    margin-top: 20px;
+    text-align: center;
+}
+#progressBar {
+    width: 100%;
+    background-color: #ddd;
+}
+#progressBar div {
+    height: 30px;
+    background-color: #4CAF50;
+    text-align: center;
+    line-height: 30px;
+    color: white;
+}
+.task-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.task-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+.task-item button {
+    margin-left: 10px;
+}
+.survey-container {
+    margin-bottom: 20px;
+}
+.survey-question {
+    margin-bottom: 10px;
+}
+.survey-options {
+    display: flex;
+    flex-direction: column;
+}
+.survey-option {
+    margin-bottom: 5px;
+}
+.survey-option input[type="radio"] {
+    margin-right: 5px;
+}
+.social-work-item button {
+    margin-left: 10px;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    #taskInput {
+        width: calc(100% - 90px);
+    }
+    .sponsor-logo {
+        width: 80px;
+        height: 80px;
+    }
+}

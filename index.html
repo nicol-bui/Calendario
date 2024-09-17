@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Tareas Estudiantiles Gamificado</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Calendario de Tareas Estudiantiles Gamificado</h1>
+        <div id="calendarHeader">
+            <button onclick="changeMonth(-1)">Mes Anterior</button>
+            <span id="monthYear"></span>
+            <button onclick="changeMonth(1)">Mes Siguiente</button>
+        </div>
+        <div id="weekDays"></div>
+        <div id="calendar"></div>
+        <div id="taskList">
+            <h2>Tareas del día</h2>
+            <div id="noTasksMessage" style="display:none;">El día de hoy no tienes ninguna actividad programada</div>
+            <ul id="tasks"></ul>
+            <input type="text" id="taskInput" placeholder="Nueva tarea">
+            <button onclick="addTask()">Agregar Tarea</button>
+        </div>
+        <div id="surveySection" style="display:none;">
+            <h2>Encuesta de Retroalimentación</h2>
+            <div class="survey-container">
+                <div class="survey-question">
+                    ¿Qué tema te está resultando más difícil?
+                    <div class="survey-options">
+                        <div class="survey-option">
+                            <input type="radio" name="dificultad" value="Matematicas">
+                            Matemáticas
+                        </div>
+                        <div class="survey-option">
+                            <input type="radio" name="dificultad" value="Lengua">
+                            Lengua
+                        </div>
+                        <div class="survey-option">
+                            <input type="radio" name="dificultad" value="Ciencias">
+                            Ciencias
+                        </div>
+                        <div class="survey-option">
+                            <input type="radio" name="dificultad" value="Historia">
+                            Historia
+                        </div>
+                        <div class="survey-option">
+                            <input type="radio" name="dificultad" value="Otro">
+                            Otro
+                        </div>
+                    </div>
+                </div>
+                <button onclick="submitSurvey()">Enviar</button>
+            </div>
+        </div>
+
+        <div id="socialWorkSection">
+            <h2>Obras Sociales Pendientes</h2>
+            <ul id="socialWorkList"></ul>
+        </div>
+        <div id="weeklyProgress">
+            <h2>Progreso Semanal</h2>
+            <div id="progressBar">
+                <div style="width:0%">0%</div>
+            </div>
+            <button onclick="resetWeeklyProgress()" id="resetProgressButton" style="display:none;">Reiniciar Progreso Semanal</button>
+        </div>
+        <div id="rewardsSection">
+            <h2>Recompensas</h2>
+            <button onclick="showFeedbackSurvey()" id="surveyButton" style="display:none;">Realizar Encuesta de Retroalimentación</button>
+            <div id="rewardsList"></div>
+        </div>
+        <div id="socialWorkSection">
+            <h2>Obras Sociales Pendientes</h2>
+            <ul id="socialWorkList"></ul>
+        </div>
+        <div id="sponsorsSection">
+            <h2>Nuestros Patrocinadores</h2>
+            <div id="sponsorLogos">
+                <div class="sponsor-logo"><img src="https://informes.valorem.com.co/wp-content/uploads/2019/03/logos-empresas_cine-colombia.svg" alt="" width="100%"></div>
+                <div class="sponsor-logo"><img src="https://playtime.felixyalegra.com/wp-content/uploads/sites/7/2019/12/logo-playtime-parques.png" alt="" width="100%"></div>
+                <div class="sponsor-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Almacenes_exito_logo.svg/120px-Almacenes_exito_logo.svg.png" alt="" width="100%"></div>
+            </div>
+        </div>
+        <div>
+            <div id="benefitsSection">
+                <h2>Beneficios de la Aplicación</h2>
+                <ol>
+                    <li>Visión clara de todas tus tareas y plazos</li>
+                    <li>Planificación del tiempo de manera más eficiente y productiva</li>
+                    <li>Retroalimentación de tu aprendizaje</li>
+                    <li>Compartir experiencias con otros estudiantes</li>
+                    <li>Bonos redimibles al alcance de los estudiantes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = new Date(currentDate);
+        let tasks = {};
+        let weeklyProgress = 0;
+        let rewards = [];
+        let socialWorks = [];
+        const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            
+            document.getElementById('monthYear').textContent = `${firstDay.toLocaleString('default', { month: 'long' })} ${year}`;
+            
+            const weekDaysEl = document.getElementById('weekDays');
+            weekDaysEl.innerHTML = weekDays.map(day => `<div>${day}</div>`).join('');
+            
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                calendar.appendChild(document.createElement('div'));
+            }
+            
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('day');
+                dayElement.textContent = day;
+                dayElement.onclick = () => selectDate(day);
+                
+                const dateString = new Date(year, month, day).toDateString();
+                if (tasks[dateString] && tasks[dateString].length > 0) {
+                    dayElement.classList.add('has-task');
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+            
+            updateSelectedDay();
+        }
+
+        function selectDate(day) {
+            selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            updateSelectedDay();
+            renderTasks();
+        }
+
+        function updateSelectedDay() {
+            const days = document.querySelectorAll('.day');
+            days.forEach(day => {
+                day.classList.remove('selected');
+                if (parseInt(day.textContent) === selectedDate.getDate() &&
+                    selectedDate.getMonth() === currentDate.getMonth() &&
+                    selectedDate.getFullYear() === currentDate.getFullYear()) {
+                    day.classList.add('selected');
+                }
+            });
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('tasks');
+            const noTasksMessage = document.getElementById('noTasksMessage');
+            taskList.innerHTML = '';
+            const dateString = selectedDate.toDateString();
+            if (tasks[dateString] && tasks[dateString].length > 0) {
+                noTasksMessage.style.display = 'none';
+                tasks[dateString].forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'task-item';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = task.completed;
+                    checkbox.onchange = () => toggleTaskCompletion(index);
+                    const taskText = document.createElement('span');
+                    taskText.textContent = task.text;
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Eliminar';
+                    deleteBtn.onclick = () => deleteTask(index);
+                    li.appendChild(checkbox);
+                    li.appendChild(taskText);
+                    li.appendChild(deleteBtn);
+                    taskList.appendChild(li);
+                });
+            } else {
+                noTasksMessage.style.display = 'block';
+            }
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const task = taskInput.value.trim();
+            if (task) {
+                const dateString = selectedDate.toDateString();
+                if (!tasks[dateString]) {
+                    tasks[dateString] = [];
+                }
+                tasks[dateString].push({ text: task, completed: false });
+                taskInput.value = '';
+                renderTasks();
+                renderCalendar();
+                updateWeeklyProgress();
+            }
+        }
+
+        function deleteTask(index) {
+            const dateString = selectedDate.toDateString();
+            if (tasks[dateString]) {
+                const task = tasks[dateString][index];
+                tasks[dateString].splice(index, 1);
+                if (!task.completed) {
+                    addSocialWork();
+                }
+                renderTasks();
+                renderCalendar();
+                updateWeeklyProgress();
+            }
+        }
+
+        function toggleTaskCompletion(index) {
+            const dateString = selectedDate.toDateString();
+            if (tasks[dateString]) {
+                tasks[dateString][index].completed = !tasks[dateString][index].completed;
+                updateWeeklyProgress();
+            }
+        }
+
+        function updateWeeklyProgress() {
+            const totalTasks = Object.values(tasks).reduce((sum, dayTasks) => sum + dayTasks.length, 0);
+            const completedTasks = Object.values(tasks).reduce((sum, dayTasks) => sum + dayTasks.filter(task => task.completed).length, 0);
+            weeklyProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            const progressBar = document.querySelector('#progressBar div');
+            progressBar.style.width = `${weeklyProgress}%`;
+            progressBar.textContent = `${weeklyProgress}%`;
+
+            if (weeklyProgress >= 80) {
+                document.getElementById('surveyButton').style.display = 'block';
+            } else {
+                document.getElementById('surveyButton').style.display = 'none';
+            }
+
+            document.getElementById('resetProgressButton').style.display = 'block';
+        }
+
+        function resetWeeklyProgress() {
+            tasks = {};
+            socialWorks = [];
+            weeklyProgress = 0;
+            renderCalendar();
+            renderTasks();
+            updateWeeklyProgress();
+            renderSocialWorks();
+        }
+
+        function showFeedbackSurvey() {
+            alert("¡Felicidades! Has completado más del 100% de tus tareas esta semana. Completa la encuesta de retroalimentación para obtener recompensas.");
+            document.getElementById('surveySection').style.display = 'block';
+        }
+
+        function submitSurvey() {
+            const selectedDifficulty = document.querySelector('input[name="dificultad"]:checked').value;
+            alert(`Gracias por tu respuesta! Te has elegido ${selectedDifficulty} como tema difícil.`);
+
+            document.getElementById('surveySection').style.display = 'none';
+            addReward("Descuento del 20% en entradas de cine");
+            addSocialWork();
+        }
+
+        function addSocialWork() {
+            const socialWork = "Ayudar en la biblioteca local por 2 horas";
+            socialWorks.push(socialWork);
+            renderSocialWorks();
+        }
+
+        function renderSocialWorks() {
+            const socialWorkList = document.getElementById('socialWorkList');
+            socialWorkList.innerHTML = '';
+            socialWorks.forEach(work => {
+                const li = document.createElement('li');
+                li.textContent = work;
+                socialWorkList.appendChild(li);
+            });
+        }
+        function resetWeeklyProgress() {
+            tasks = {};
+            socialWorks = []; // Restablece las labores sociales
+            weeklyProgress = 0;
+            rewards = []; // Restablece las recompensas
+            renderCalendar();
+            renderTasks();
+            updateWeeklyProgress();
+            renderSocialWorks();
+            renderRewards(); // Actualiza la visualización de recompensas
+        }
+
+        function addReward(reward) {
+            rewards.push(reward);
+            renderRewards();
+        }
+
+        function renderRewards() {
+            const rewardsList = document.getElementById('rewardsList');
+            rewardsList.innerHTML = '';
+            rewards.forEach(reward => {
+                const li = document.createElement('li');
+                li.textContent = reward;
+                rewardsList.appendChild(li);
+            });
+        }
+
+        renderCalendar();
+        renderTasks();
+        updateWeeklyProgress();
+        renderSocialWorks();
+    </script>
+</body>
+</html>
